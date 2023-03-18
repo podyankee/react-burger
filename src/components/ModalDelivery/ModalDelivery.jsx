@@ -2,7 +2,7 @@ import classNames from 'classnames';
 import style from './ModalDelivery.module.css';
 import { useSelector, useDispatch } from 'react-redux';
 import { closeModal } from '../../store/modalDelivery/modalDeliverySlice';
-import { updateFormValue, submitForm } from '../../store/form/formSlice';
+import { updateFormValue, submitForm, validateForm, changeTouch } from '../../store/form/formSlice';
 
 export const ModalDelivery = () => {
 	const { isOpen } = useSelector(state => state.modal);
@@ -16,11 +16,20 @@ export const ModalDelivery = () => {
 				value: e.target.value,
 			}),
 		);
+
+		dispatch(validateForm());
 	};
 
 	const handleSubmit = e => {
 		e.preventDefault();
-		dispatch(submitForm({ ...form, orderList }));
+		dispatch(validateForm());
+		dispatch(changeTouch());
+
+		// console.log(form.errors);
+
+		if (Object.keys(form.errors).length === 0 && form.touch) {
+			dispatch(submitForm({ ...form, orderList }));
+		}
 	};
 
 	return (
@@ -38,14 +47,17 @@ export const ModalDelivery = () => {
 
 						<form className={style.form} id='delivery' onSubmit={handleSubmit}>
 							<fieldset className={style.fieldset}>
-								<input
-									className={style.input}
-									type='text'
-									name='name'
-									value={form.name}
-									placeholder='Ваше имя'
-									onChange={handleInputChange}
-								/>
+								<label>
+									<input
+										className={style.input}
+										type='text'
+										name='name'
+										value={form.name}
+										placeholder='Ваше имя'
+										onChange={handleInputChange}
+									/>
+									{/* {form.errors.name && <span>Заполните это поле.</span>} */}
+								</label>
 								<input
 									className={style.input}
 									type='tel'
@@ -114,6 +126,7 @@ export const ModalDelivery = () => {
 						<button className={style.submit} type='submit' form='delivery'>
 							Оформить
 						</button>
+						{form.touch && Object.entries(form.errors).map(([key, err]) => <p key={key}>{err}</p>)}
 					</div>
 
 					<button
