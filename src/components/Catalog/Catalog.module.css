@@ -27,7 +27,7 @@
 	}
 
 	.container {
-		display: flex;
+		display: flex !important;
 		gap: 30px;
 	}
 
